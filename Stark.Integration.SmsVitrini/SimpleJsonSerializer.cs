@@ -2,14 +2,14 @@
 {
     public class SimpleJsonSerializer : IJsonSerializer
     {
-        public string Serialize<T>(T data)
+        public string Serialize(object data)
         {
-            throw new System.NotImplementedException();
+            return SimpleJson.SimpleJson.SerializeObject(data);
         }
 
         public T Deserialize<T>(string serializedString)
         {
-            throw new System.NotImplementedException();
+            return SimpleJson.SimpleJson.DeserializeObject<T>(serializedString);
         }
     }
 }

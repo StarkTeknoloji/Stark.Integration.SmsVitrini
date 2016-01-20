@@ -2,7 +2,7 @@
 {
     public interface IJsonSerializer
     {
-        string Serialize<T>(T data);
+        string Serialize(object data);
 
         T Deserialize<T>(string serializedString);
     }

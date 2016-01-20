@@ -4,7 +4,7 @@ namespace Stark.Integration.SmsVitrini.Models
 {
     public class Message
     {
-        public List<long> Numbers { get; set; }
+        public List<string> Numbers { get; set; }
         
         public string Text { get; set; }
     }
