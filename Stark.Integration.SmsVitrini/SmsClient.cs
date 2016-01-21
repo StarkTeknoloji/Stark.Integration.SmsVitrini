@@ -68,13 +68,14 @@ namespace Stark.Integration.SmsVitrini
                 throw new ArgumentNullException("message");
             }
 
-            List<Message> messages = new List<Message>();
-            messages.Add(message);
+            List<Message> messages = new List<Message> { message };
             return Send(originator, messages, includeSpecialTurkishCharacters);
         }
 
         public ServiceResult<MessageResponse> Send(string originator, List<Message> messages, bool includeSpecialTurkishCharacters = false)
         {
+            ServiceResult<MessageResponse> result = new ServiceResult<MessageResponse>();
+            
             if (String.IsNullOrEmpty(originator))
             {
                 throw new ArgumentNullException("originator");
@@ -82,7 +83,22 @@ namespace Stark.Integration.SmsVitrini
 
             SmsRequest smsRequest = new SmsRequest(_userName, _password, originator, messages, includeSpecialTurkishCharacters);
             SmsResponse smsResponse = Post<SmsResponse>("http://api.mesajpaneli.com/json_api/", smsRequest);
-            return null;
+
+            if (smsResponse.status)
+            {
+                result.Success = true;
+                result.Data = new MessageResponse()
+                {
+                    SmsReferenceNo = smsResponse.@ref.ToString()
+                };
+            }
+            else
+            {
+                result.Success = false;
+                result.Message = smsResponse.error;
+            }
+
+            return result;
         }
 
         public ServiceResult<CustomerDetail> GetCustomerDetails()
@@ -115,38 +131,59 @@ namespace Stark.Integration.SmsVitrini
             throw new NotImplementedException();
         }
 
-        private T Post<T>(string url, object request) where T : BaseResponse, new()
+        private T Post<T>(string url, object payload) where T : BaseResponse, new()
         {
-            string jsonString = _serializer.Serialize(request);
-            byte[] byteArray = Encoding.UTF8.GetBytes(jsonString);
-            string base64String = Convert.ToBase64String(byteArray);
-            string requestString = String.Concat("data=", base64String);
-            WebRequest req = WebRequest.Create(url);
-            req.Timeout = (int)_timeOut.TotalMilliseconds;
-            req.ContentType = "application/x-www-form-urlencoded";
-            req.Method = "POST";
-            byte[] bytes = Encoding.UTF8.GetBytes(requestString);
-            req.ContentLength = bytes.Length;
-            Stream os = req.GetRequestStream();
-            os.Write(bytes, 0, bytes.Length);
-            os.Close();
-            WebResponse resp = req.GetResponse();
-            Stream responseStream = resp.GetResponseStream();
+            T defaultResponse;
 
-            if (responseStream != null)
+            try
             {
-                StreamReader sr = new StreamReader(responseStream);
-                string response = sr.ReadToEnd().Trim();
-                byteArray = Convert.FromBase64String(response);
-                response = Encoding.UTF8.GetString(byteArray);
-                return _serializer.Deserialize<T>(response);
+                string jsonString = _serializer.Serialize(payload);
+                byte[] byteArray = Encoding.UTF8.GetBytes(jsonString);
+                string base64String = Convert.ToBase64String(byteArray);
+                string requestString = String.Concat("data=", base64String);
+                byteArray = Encoding.UTF8.GetBytes(requestString);
+
+                WebRequest request = WebRequest.Create(url);
+                request.Timeout = (int)_timeOut.TotalMilliseconds;
+                request.ContentType = "application/x-www-form-urlencoded";
+                request.Method = "POST";
+                request.ContentLength = byteArray.Length;
+
+                using (Stream requestStream = request.GetRequestStream())
+                {
+                    requestStream.Write(byteArray, 0, byteArray.Length);
+                }
+
+                WebResponse response = request.GetResponse();
+
+                using (Stream responseStream = response.GetResponseStream())
+                {
+                    if (responseStream != null && responseStream != Stream.Null)
+                    {
+                        using (StreamReader sr = new StreamReader(responseStream))
+                        {
+                            string responseString = sr.ReadToEnd().Trim();
+                            byteArray = Convert.FromBase64String(responseString);
+                            responseString = Encoding.UTF8.GetString(byteArray);
+                            return _serializer.Deserialize<T>(responseString);
+                        }
+                    }
+                }
+
+                defaultResponse = new T()
+                {
+                    status = false,
+                    error = "Cannot get any response from service."
+                };
             }
-
-            T defaultResponse = new T
+            catch (Exception ex)
             {
-                status = false,
-                error = "Cannot get any response from service."
-            };
+                defaultResponse = new T()
+                {
+                    status = false,
+                    error = ex.Message
+                };
+            }
 
             return defaultResponse;
         }

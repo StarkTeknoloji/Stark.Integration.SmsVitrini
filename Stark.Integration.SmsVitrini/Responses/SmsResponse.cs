@@ -2,6 +2,6 @@
 {
     public class SmsResponse : BaseResponse
     {
-         
+         public long @ref { get; set; }
     }
 }
