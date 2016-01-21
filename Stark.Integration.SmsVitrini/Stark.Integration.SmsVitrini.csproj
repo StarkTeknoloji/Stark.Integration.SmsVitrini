@@ -45,16 +45,19 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Requests\AuthenticationData.cs" />
     <Compile Include="Requests\BaseRequest.cs" />
+    <Compile Include="Requests\LoginRequest.cs" />
     <Compile Include="Requests\MessageData.cs" />
     <Compile Include="Requests\SmsRequest.cs" />
+    <Compile Include="Responses\BaseResponse.cs" />
+    <Compile Include="Responses\LoginResponse.cs" />
+    <Compile Include="Responses\SmsResponse.cs" />
+    <Compile Include="Responses\UserData.cs" />
     <Compile Include="SimpleJson.cs" />
     <Compile Include="SimpleJsonSerializer.cs" />
     <Compile Include="SmsClient.cs" />
     <Compile Include="TurkeyPhoneNumberValidator.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Responses\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

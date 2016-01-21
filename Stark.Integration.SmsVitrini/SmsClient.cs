@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Net;
 using System.Text;
 using Stark.Integration.SmsVitrini.Models;
 using Stark.Integration.SmsVitrini.Requests;
+using Stark.Integration.SmsVitrini.Responses;
 
 namespace Stark.Integration.SmsVitrini
 {
@@ -78,47 +81,74 @@ namespace Stark.Integration.SmsVitrini
             }
 
             SmsRequest smsRequest = new SmsRequest(_userName, _password, originator, messages, includeSpecialTurkishCharacters);
-            string jsonString = _serializer.Serialize(smsRequest);
-            byte[] byteArray = Encoding.UTF8.GetBytes(jsonString);
-            string base64String = Convert.ToBase64String(byteArray);
-            string requestString = String.Concat("data=", base64String);
-
-            string response = HttpPost("http://api.mesajpaneli.com/json_api/", requestString);
-            byteArray = Convert.FromBase64String(response);
-            response = Encoding.UTF8.GetString(byteArray);
-            //WebRequest request = WebRequest.Create();
-            //request.Method = "POST";
-            //request.ContentType = "application/x-www-form-urlencoded";
-            //WebResponse response = request.
+            SmsResponse smsResponse = Post<SmsResponse>("http://api.mesajpaneli.com/json_api/", smsRequest);
             return null;
-        }
-
-        public static string HttpPost(string URI, string Parameters)
-        {
-            System.Net.WebRequest req = System.Net.WebRequest.Create(URI);
-            //Add these, as we're doing a POST
-            req.ContentType = "application/x-www-form-urlencoded";
-            req.Method = "POST";
-            //We need to count how many bytes we're sending. Post'ed Faked Forms should be name=value&
-            byte[] bytes = System.Text.Encoding.ASCII.GetBytes(Parameters);
-            req.ContentLength = bytes.Length;
-            System.IO.Stream os = req.GetRequestStream();
-            os.Write(bytes, 0, bytes.Length); //Push it out there
-            os.Close();
-            System.Net.WebResponse resp = req.GetResponse();
-            if (resp == null) return null;
-            System.IO.StreamReader sr = new System.IO.StreamReader(resp.GetResponseStream());
-            return sr.ReadToEnd().Trim();
         }
 
         public ServiceResult<CustomerDetail> GetCustomerDetails()
         {
-            throw new NotImplementedException();
+            ServiceResult<CustomerDetail> result = new ServiceResult<CustomerDetail>();
+
+            LoginRequest loginRequest = new LoginRequest(_userName, _password);
+            LoginResponse loginResponse = Post<LoginResponse>("http://api.mesajpaneli.com/json_api/login", loginRequest);
+
+            if (!loginResponse.status)
+            {
+                result.Success = false;
+                result.Message = loginResponse.error;
+            }
+            else
+            {
+                result.Success = true;
+                result.Data = new CustomerDetail()
+                {
+                    CustomerId = loginResponse.userData.musteriid,
+                    Credits = Convert.ToInt32(loginResponse.userData.orjinli)
+                };
+            }
+
+            return result;
         }
 
         public ServiceResult<List<ReportItem>> GetReports(string smsReferenceNo)
         {
             throw new NotImplementedException();
+        }
+
+        private T Post<T>(string url, object request) where T : BaseResponse, new()
+        {
+            string jsonString = _serializer.Serialize(request);
+            byte[] byteArray = Encoding.UTF8.GetBytes(jsonString);
+            string base64String = Convert.ToBase64String(byteArray);
+            string requestString = String.Concat("data=", base64String);
+            WebRequest req = WebRequest.Create(url);
+            req.Timeout = (int)_timeOut.TotalMilliseconds;
+            req.ContentType = "application/x-www-form-urlencoded";
+            req.Method = "POST";
+            byte[] bytes = Encoding.UTF8.GetBytes(requestString);
+            req.ContentLength = bytes.Length;
+            Stream os = req.GetRequestStream();
+            os.Write(bytes, 0, bytes.Length);
+            os.Close();
+            WebResponse resp = req.GetResponse();
+            Stream responseStream = resp.GetResponseStream();
+
+            if (responseStream != null)
+            {
+                StreamReader sr = new StreamReader(responseStream);
+                string response = sr.ReadToEnd().Trim();
+                byteArray = Convert.FromBase64String(response);
+                response = Encoding.UTF8.GetString(byteArray);
+                return _serializer.Deserialize<T>(response);
+            }
+
+            T defaultResponse = new T
+            {
+                status = false,
+                error = "Cannot get any response from service."
+            };
+
+            return defaultResponse;
         }
     }
 }

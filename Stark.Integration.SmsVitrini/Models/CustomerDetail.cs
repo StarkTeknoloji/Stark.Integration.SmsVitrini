@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace Stark.Integration.SmsVitrini.Models
+﻿namespace Stark.Integration.SmsVitrini.Models
 {
     public class CustomerDetail
     {
+        public string CustomerId { get; set; }
+
+        public int Credits { get; set; }
     }
 }

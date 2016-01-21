@@ -12,7 +12,20 @@ namespace Stark.Integration.SmsVitrini.IntegrationTests
         public void SmsSendTest()
         {
             SmsClient client = new SmsClient("", "");
-            client.Send("CAGRISMS", new List<Message>() {new Message() { Numbers = new List<string>() {"5542346742"}, Text = "Test Mesajıdır."}});
+            client.Send("CAGRISMS", new List<Message>()
+            {
+                new Message() { Numbers = new List<string>() {"5542346742"}, Text = "5542346742"}
+            });
+        }
+
+        [TestMethod]
+        public void GetCustomerDetailsTest()
+        {
+            SmsClient client = new SmsClient("", "");
+            ServiceResult<CustomerDetail> result = client.GetCustomerDetails();
+            Assert.IsNotNull(result);
+            Assert.IsTrue(result.Success);
+            Assert.IsNotNull(result.Data);
         }
     }
 }
