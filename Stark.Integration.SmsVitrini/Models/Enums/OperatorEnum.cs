@@ -2,10 +2,12 @@
 {
     public enum OperatorEnum
     {
-        Turkcell = 0,
+        Unknown = 0,
 
-        Avea = 1,
+        Turkcell = 1,
 
-        Vodafone = 2
+        Avea = 2,
+
+        Vodafone = 3
     }
 }

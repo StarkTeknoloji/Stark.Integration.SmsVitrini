@@ -39,6 +39,8 @@
     <Compile Include="IJsonSerializer.cs" />
     <Compile Include="IPhoneNumberValidator.cs" />
     <Compile Include="Models\CustomerDetail.cs" />
+    <Compile Include="Models\Enums\FailReasonEnum.cs" />
+    <Compile Include="Models\Enums\MessageStatusEnum.cs" />
     <Compile Include="Models\Enums\OperatorEnum.cs" />
     <Compile Include="Models\Message.cs" />
     <Compile Include="Models\MessageResponse.cs" />

@@ -9,7 +9,7 @@ namespace Stark.Integration.SmsVitrini.IntegrationTests
     public class IntegrationTest
     {
         private const string UserName = "cagrisms";
-        private const string Password = "pjwQUW8Fp74q3J";
+        private const string Password = "scratt7272";
 
         [TestMethod]
         public void SmsSendTest()

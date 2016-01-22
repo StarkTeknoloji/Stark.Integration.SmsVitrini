@@ -10,5 +10,7 @@ namespace Stark.Integration.SmsVitrini.Responses
 
         [DataMember(Name = "error")]
         public string ErrorMessage { get; set; }
+
+        public string ResponseString { get; set; }
     }
 }

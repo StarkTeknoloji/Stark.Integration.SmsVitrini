@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text;
 using Stark.Integration.SmsVitrini.Models;
+using Stark.Integration.SmsVitrini.Models.Enums;
 using Stark.Integration.SmsVitrini.Requests;
 using Stark.Integration.SmsVitrini.Responses;
 
@@ -23,7 +26,7 @@ namespace Stark.Integration.SmsVitrini
         }
 
         public SmsClient(string userName, string password, TimeSpan timeOut)
-            : this(userName, password, timeOut, new TurkeyPhoneNumberValidator())
+            : this(userName, password, timeOut, null)
         {
         }
 
@@ -44,11 +47,6 @@ namespace Stark.Integration.SmsVitrini
                 throw new ArgumentNullException("password");
             }
 
-            if (phoneNumberValidator == null)
-            {
-                throw new ArgumentNullException("phoneNumberValidator");
-            }
-
             if (serializer == null)
             {
                 throw new ArgumentNullException("serializer");
@@ -65,7 +63,11 @@ namespace Stark.Integration.SmsVitrini
         {
             if (message == null)
             {
-                throw new ArgumentNullException("message");
+                return new ServiceResult<MessageResponse>()
+                {
+                    Success = false,
+                    Message = "You need to provide at least 1 Message to send."
+                };
             }
 
             List<Message> messages = new List<Message> { message };
@@ -75,10 +77,37 @@ namespace Stark.Integration.SmsVitrini
         public ServiceResult<MessageResponse> Send(string originator, List<Message> messages, bool includeSpecialTurkishCharacters = false)
         {
             ServiceResult<MessageResponse> result = new ServiceResult<MessageResponse>();
-            
+
             if (String.IsNullOrEmpty(originator))
             {
-                throw new ArgumentNullException("originator");
+                result = new ServiceResult<MessageResponse>()
+                {
+                    Success = false,
+                    Message = "You need to provider an originator."
+                };
+            }
+
+            if (messages == null || !messages.Any())
+            {
+                return new ServiceResult<MessageResponse>()
+                {
+                    Success = false,
+                    Message = "You need to provide at least 1 Message to send."
+                };
+            }
+
+            if (_phoneNumberValidator != null)
+            {
+                messages = GetValidMessages(messages);
+            }
+
+            if (messages == null || !messages.Any())
+            {
+                return new ServiceResult<MessageResponse>()
+                {
+                    Success = false,
+                    Message = "You need to provide at least 1 valid Message to send. Check your phone numbers and message texts."
+                };
             }
 
             SmsRequest smsRequest = new SmsRequest(_userName, _password, originator, messages, includeSpecialTurkishCharacters);
@@ -132,8 +161,48 @@ namespace Stark.Integration.SmsVitrini
 
             ReportRequest reportRequest = new ReportRequest(_userName, _password, smsReferenceNo);
             ReportResponse reportResponse = Post<ReportResponse>("http://api.mesajpaneli.com/json_api/report", reportRequest);
-            return null;
+
+            if (reportResponse == null)
+            {
+                result.Success = false;
+                result.Message = "Cannot get any response from service.";
+            }
+            else if (!reportResponse.Success || reportResponse.Data == null || reportResponse.Data.ReportDetailItemContainer == null)
+            {
+                result.Success = false;
+                result.Message = String.Format("There is a problem with the service response. Check the response string for more information: {0}", reportResponse.ResponseString);
+            }
+            else
+            {
+                result.Success = true;
+                result.Data = new List<ReportItem>();
+
+                List<ReportItem> waitingRequests = GetReportItemsFromReportDetailItems(reportResponse.Data.ReportDetailItemContainer.WaitingNumberReportDetailItems, MessageStatusEnum.WaitingOnHost);
+                List<ReportItem> successfulRequests = GetReportItemsFromReportDetailItems(reportResponse.Data.ReportDetailItemContainer.SentNumberReportDetailItems, MessageStatusEnum.Success);
+                List<ReportItem> failedRequests = GetReportItemsFromReportDetailItems(reportResponse.Data.ReportDetailItemContainer.FailedNumberReportDetailItems, MessageStatusEnum.Failed);
+
+                if (waitingRequests != null && waitingRequests.Any())
+                {
+                    result.Data.AddRange(waitingRequests);
+                }
+
+                if (successfulRequests != null && successfulRequests.Any())
+                {
+                    result.Data.AddRange(successfulRequests);
+                }
+
+                if (failedRequests != null && failedRequests.Any())
+                {
+                    result.Data.AddRange(failedRequests);
+                }
+
+                return result;
+            }
+
+            return result;
         }
+
+        #region Helpers
 
         private T Post<T>(string url, object payload) where T : BaseResponse, new()
         {
@@ -169,7 +238,9 @@ namespace Stark.Integration.SmsVitrini
                             string responseString = sr.ReadToEnd().Trim();
                             byteArray = Convert.FromBase64String(responseString);
                             responseString = Encoding.UTF8.GetString(byteArray);
-                            return _serializer.Deserialize<T>(responseString);
+                            defaultResponse = _serializer.Deserialize<T>(responseString);
+                            defaultResponse.ResponseString = responseString;
+                            return defaultResponse;
                         }
                     }
                 }
@@ -191,5 +262,120 @@ namespace Stark.Integration.SmsVitrini
 
             return defaultResponse;
         }
+
+        private List<Message> GetValidMessages(List<Message> messages)
+        {
+            List<Message> results = new List<Message>();
+
+            if (messages != null && messages.Any())
+            {
+                foreach (Message message in messages)
+                {
+                    if (message != null && String.IsNullOrEmpty(message.Text) && message.Numbers != null && message.Numbers.Any())
+                    {
+                        Message newMessage = new Message()
+                        {
+                            Text = message.Text
+                        };
+
+                        List<string> numbers = message.Numbers.Where(n => _phoneNumberValidator.IsValid(n)).ToList();
+
+                        if (numbers.Any())
+                        {
+                            newMessage.Numbers = numbers;
+                        }
+
+                        results.Add(newMessage);
+                    }
+                }
+            }
+
+            return results;
+        }
+
+        private List<ReportItem> GetReportItemsFromReportDetailItems(List<ReportDetailItem> reportDetailItems, MessageStatusEnum status)
+        {
+            if (reportDetailItems == null || !reportDetailItems.Any())
+            {
+                return null;
+            }
+
+            List<ReportItem> results = new List<ReportItem>();
+
+            foreach (ReportDetailItem reportDetailItem in reportDetailItems)
+            {
+                if (reportDetailItem == null)
+                {
+                    continue;
+                }
+
+                ReportItem item = new ReportItem();
+
+                item.DeliveredOn = GetDeliveryTimeFromReportDetailItem(reportDetailItem);
+                item.PhoneNumber = reportDetailItem.Number;
+                item.Status = status;
+                item.Operator = GetOperatorFromReportDetailItem(reportDetailItem);
+
+                if (item.Status == MessageStatusEnum.Failed)
+                {
+                    item.FailReason = GetFailReasonFromReportDetailItem(reportDetailItem);
+                }
+
+                results.Add(item);
+            }
+
+            return results;
+        }
+
+        private FailReasonEnum? GetFailReasonFromReportDetailItem(ReportDetailItem reportDetailItem)
+        {
+            // TODO: We don't know result codes yet.
+            return null;
+        }
+
+        private OperatorEnum GetOperatorFromReportDetailItem(ReportDetailItem reportDetailItem)
+        {
+            if (String.IsNullOrEmpty(reportDetailItem.Operator))
+            {
+                return OperatorEnum.Unknown;
+            }
+
+            if (reportDetailItem.Operator.ToLower() == "avea")
+            {
+                return OperatorEnum.Avea;
+            }
+
+            if (reportDetailItem.Operator.ToLower() == "turkcell")
+            {
+                return OperatorEnum.Turkcell;
+            }
+
+            if (reportDetailItem.Operator.ToLower() == "vodafone")
+            {
+                return OperatorEnum.Vodafone;
+            }
+
+            return OperatorEnum.Unknown;
+        }
+
+        private DateTime? GetDeliveryTimeFromReportDetailItem(ReportDetailItem reportDetailItem)
+        {
+            if (String.IsNullOrEmpty(reportDetailItem.CompletedOn))
+            {
+                return null;
+            }
+
+            DateTime result;
+
+            // TODO: We don't know timezone of this field yet. So this implementation needs further development.
+            if (DateTime.TryParseExact(reportDetailItem.CompletedOn, "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out result))
+            {
+                return result;
+            }
+
+            return null;
+        }
+
+        #endregion
     }
 }
