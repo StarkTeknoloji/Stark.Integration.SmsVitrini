@@ -39,6 +39,7 @@
     <Compile Include="IJsonSerializer.cs" />
     <Compile Include="IPhoneNumberValidator.cs" />
     <Compile Include="Models\CustomerDetail.cs" />
+    <Compile Include="Models\Enums\OperatorEnum.cs" />
     <Compile Include="Models\Message.cs" />
     <Compile Include="Models\MessageResponse.cs" />
     <Compile Include="Models\ReportItem.cs" />
@@ -48,9 +49,14 @@
     <Compile Include="Requests\BaseRequest.cs" />
     <Compile Include="Requests\LoginRequest.cs" />
     <Compile Include="Requests\MessageData.cs" />
+    <Compile Include="Requests\ReportRequest.cs" />
     <Compile Include="Requests\SmsRequest.cs" />
     <Compile Include="Responses\BaseResponse.cs" />
     <Compile Include="Responses\LoginResponse.cs" />
+    <Compile Include="Responses\ReportDetailItemContainer.cs" />
+    <Compile Include="Responses\ReportData.cs" />
+    <Compile Include="Responses\ReportDetailItem.cs" />
+    <Compile Include="Responses\ReportResponse.cs" />
     <Compile Include="Responses\SmsResponse.cs" />
     <Compile Include="Responses\UserData.cs" />
     <Compile Include="SimpleJson.cs" />

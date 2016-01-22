@@ -128,7 +128,11 @@ namespace Stark.Integration.SmsVitrini
 
         public ServiceResult<List<ReportItem>> GetReports(string smsReferenceNo)
         {
-            throw new NotImplementedException();
+            ServiceResult<List<ReportItem>> result = new ServiceResult<List<ReportItem>>();
+
+            ReportRequest reportRequest = new ReportRequest(_userName, _password, smsReferenceNo);
+            ReportResponse reportResponse = Post<ReportResponse>("http://api.mesajpaneli.com/json_api/report", reportRequest);
+            return null;
         }
 
         private T Post<T>(string url, object payload) where T : BaseResponse, new()
