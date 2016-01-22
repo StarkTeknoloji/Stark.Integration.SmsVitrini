@@ -1,15 +1,20 @@
-﻿namespace Stark.Integration.SmsVitrini.Requests
+﻿using System.Runtime.Serialization;
+
+namespace Stark.Integration.SmsVitrini.Requests
 {
+    [DataContract]
     public class AuthenticationData
     {
         public AuthenticationData(string userName, string password)
         {
-            name = userName;
-            pass = password;
+            UserName = userName;
+            Password = password;
         }
 
-        public string name { get; set; }
+        [DataMember(Name = "name")]
+        public string UserName { get; set; }
 
-        public string pass { get; set; }
+        [DataMember(Name = "pass")]
+        public string Password { get; set; }
     }
 }

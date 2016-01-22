@@ -84,18 +84,18 @@ namespace Stark.Integration.SmsVitrini
             SmsRequest smsRequest = new SmsRequest(_userName, _password, originator, messages, includeSpecialTurkishCharacters);
             SmsResponse smsResponse = Post<SmsResponse>("http://api.mesajpaneli.com/json_api/", smsRequest);
 
-            if (smsResponse.status)
+            if (smsResponse.Success)
             {
                 result.Success = true;
                 result.Data = new MessageResponse()
                 {
-                    SmsReferenceNo = smsResponse.@ref.ToString()
+                    SmsReferenceNo = smsResponse.SmsReferenceNo.ToString()
                 };
             }
             else
             {
                 result.Success = false;
-                result.Message = smsResponse.error;
+                result.Message = smsResponse.ErrorMessage;
             }
 
             return result;
@@ -108,18 +108,18 @@ namespace Stark.Integration.SmsVitrini
             LoginRequest loginRequest = new LoginRequest(_userName, _password);
             LoginResponse loginResponse = Post<LoginResponse>("http://api.mesajpaneli.com/json_api/login", loginRequest);
 
-            if (!loginResponse.status)
+            if (!loginResponse.Success)
             {
                 result.Success = false;
-                result.Message = loginResponse.error;
+                result.Message = loginResponse.ErrorMessage;
             }
             else
             {
                 result.Success = true;
                 result.Data = new CustomerDetail()
                 {
-                    CustomerId = loginResponse.userData.musteriid,
-                    Credits = Convert.ToInt32(loginResponse.userData.orjinli)
+                    CustomerId = loginResponse.UserData.CustomerId,
+                    Credits = Convert.ToInt32(loginResponse.UserData.Credits)
                 };
             }
 
@@ -172,16 +172,16 @@ namespace Stark.Integration.SmsVitrini
 
                 defaultResponse = new T()
                 {
-                    status = false,
-                    error = "Cannot get any response from service."
+                    Success = false,
+                    ErrorMessage = "Cannot get any response from service."
                 };
             }
             catch (Exception ex)
             {
                 defaultResponse = new T()
                 {
-                    status = false,
-                    error = ex.Message
+                    Success = false,
+                    ErrorMessage = ex.Message
                 };
             }
 

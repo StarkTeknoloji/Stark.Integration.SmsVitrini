@@ -1,9 +1,14 @@
-﻿namespace Stark.Integration.SmsVitrini.Responses
+﻿using System.Runtime.Serialization;
+
+namespace Stark.Integration.SmsVitrini.Responses
 {
+    [DataContract]
     public class BaseResponse
     {
-        public bool status { get; set; }
+        [DataMember(Name = "status")]
+        public bool Success { get; set; }
 
-        public string error { get; set; }
+        [DataMember(Name = "error")]
+        public string ErrorMessage { get; set; }
     }
 }

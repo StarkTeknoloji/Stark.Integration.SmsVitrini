@@ -1,7 +1,11 @@
-﻿namespace Stark.Integration.SmsVitrini.Responses
+﻿using System.Runtime.Serialization;
+
+namespace Stark.Integration.SmsVitrini.Responses
 {
+    [DataContract]
     public class LoginResponse : BaseResponse
     {
-         public UserData userData { get; set; }
+        [DataMember(Name = "userData")]
+        public UserData UserData { get; set; }
     }
 }

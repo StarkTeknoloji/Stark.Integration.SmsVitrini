@@ -1,23 +1,33 @@
 ﻿using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace Stark.Integration.SmsVitrini.Responses
 {
+    [DataContract]
     public class UserData
     {
-        public string musteriid { get; set; }
+        [DataMember(Name = "musteriid")]
+        public string CustomerId { get; set; }
 
-        public string bayiid { get; set; }
+        [DataMember(Name = "bayiid")]
+        public string ResellerId { get; set; }
 
-        public string musterikodu { get; set; }
+        [DataMember(Name = "musterikodu")]
+        public string CustomerCode { get; set; }
 
-        public string yetkiliadsoyad { get; set; }
+        [DataMember(Name = "yetkiliadsoyad")]
+        public string AuthorizedPerson { get; set; }
 
-        public string firma { get; set; }
+        [DataMember(Name = "firma")]
+        public string CompanyName { get; set; }
 
-        public string orjinli { get; set; }
+        [DataMember(Name = "orjinli")]
+        public string Credits { get; set; }
 
-        public string sistem_kredi { get; set; }
+        [DataMember(Name = "sistem_kredi")]
+        public string StandartCredits { get; set; }
 
-        public List<string> basliklar { get; set; }
+        [DataMember(Name = "basliklar")]
+        public List<string> Originators { get; set; }
     }
 }

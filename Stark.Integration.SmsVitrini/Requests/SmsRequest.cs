@@ -1,27 +1,32 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using Stark.Integration.SmsVitrini.Models;
 
 namespace Stark.Integration.SmsVitrini.Requests
 {
+    [DataContract]
     public class SmsRequest : BaseRequest
     {
         public SmsRequest(string userName, string password, string originator, List<Message> messages, bool includeTurkishCharacters)
             : base(userName, password)
         {
-            msgBaslik = originator;
-            tr = includeTurkishCharacters;
-            msgData = messages.Select(m => new MessageData()
+            Originator = originator;
+            IncludeSpecialTurkishCharacters = includeTurkishCharacters;
+            Messages = messages.Select(m => new MessageData()
             {
-                msg = m.Text,
-                tel = m.Numbers
+                Text = m.Text,
+                Numbers = m.Numbers
             }).ToList();
         }
 
-        public string msgBaslik { get; set; }
+        [DataMember(Name = "msgBaslik")]
+        public string Originator { get; set; }
 
-        public List<MessageData> msgData { get; set; }
+        [DataMember(Name = "msgData")]
+        public List<MessageData> Messages { get; set; }
 
-        public bool tr { get; set; }
+        [DataMember(Name = "tr")]
+        public bool IncludeSpecialTurkishCharacters { get; set; }
     }
 }
