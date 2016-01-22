@@ -8,8 +8,8 @@ namespace Stark.Integration.SmsVitrini.IntegrationTests
     [TestClass]
     public class IntegrationTest
     {
-        private const string UserName = "cagrisms";
-        private const string Password = "scratt7272";
+        private const string UserName = "username";
+        private const string Password = "password";
 
         [TestMethod]
         public void SmsSendTest()
@@ -48,7 +48,10 @@ namespace Stark.Integration.SmsVitrini.IntegrationTests
         public void GetReportsTest()
         {
             SmsClient client = new SmsClient(UserName, Password);
-            client.GetReports("28218827");
+            ServiceResult<List<ReportItem>> result = client.GetReports("28218827");
+            Assert.IsNotNull(result);
+            Assert.IsTrue(result.Success);
+            Assert.IsNotNull(result.Data);
         }
     }
 }
