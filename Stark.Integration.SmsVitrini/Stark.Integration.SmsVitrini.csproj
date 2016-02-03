@@ -63,7 +63,7 @@
     <Compile Include="Responses\UserData.cs" />
     <Compile Include="SimpleJson.cs" />
     <Compile Include="SimpleJsonSerializer.cs" />
-    <Compile Include="SmsClient.cs" />
+    <Compile Include="SmsVitriniClient.cs" />
     <Compile Include="TurkeyPhoneNumberValidator.cs" />
   </ItemGroup>
   <ItemGroup />

@@ -12,7 +12,7 @@ using Stark.Integration.SmsVitrini.Responses;
 
 namespace Stark.Integration.SmsVitrini
 {
-    public class SmsClient
+    public class SmsVitriniClient
     {
         private readonly string _userName;
         private readonly string _password;
@@ -20,22 +20,22 @@ namespace Stark.Integration.SmsVitrini
         private readonly IJsonSerializer _serializer;
         private readonly IPhoneNumberValidator _phoneNumberValidator;
 
-        public SmsClient(string userName, string password)
+        public SmsVitriniClient(string userName, string password)
             : this(userName, password, TimeSpan.FromSeconds(30))
         {
         }
 
-        public SmsClient(string userName, string password, TimeSpan timeOut)
+        public SmsVitriniClient(string userName, string password, TimeSpan timeOut)
             : this(userName, password, timeOut, null)
         {
         }
 
-        public SmsClient(string userName, string password, TimeSpan timeOut, IPhoneNumberValidator phoneNumberValidator)
+        public SmsVitriniClient(string userName, string password, TimeSpan timeOut, IPhoneNumberValidator phoneNumberValidator)
             : this(userName, password, timeOut, phoneNumberValidator, new SimpleJsonSerializer())
         {
         }
 
-        public SmsClient(string userName, string password, TimeSpan timeOut, IPhoneNumberValidator phoneNumberValidator, IJsonSerializer serializer)
+        public SmsVitriniClient(string userName, string password, TimeSpan timeOut, IPhoneNumberValidator phoneNumberValidator, IJsonSerializer serializer)
         {
             if (String.IsNullOrEmpty(userName))
             {

@@ -14,7 +14,7 @@ namespace Stark.Integration.SmsVitrini.IntegrationTests
         [TestMethod]
         public void SmsSendTest()
         {
-            SmsClient client = new SmsClient(UserName, Password);
+            SmsVitriniClient client = new SmsVitriniClient(UserName, Password);
             ServiceResult<MessageResponse> result = client.Send("CAGRI SMS", new Message() { Numbers = new List<string>() { "5555555555" }, Text = "Sample string 1." });
             Assert.IsNotNull(result);
             Assert.IsTrue(result.Success);
@@ -24,7 +24,7 @@ namespace Stark.Integration.SmsVitrini.IntegrationTests
         [TestMethod]
         public void MultiSmsSendTest()
         {
-            SmsClient client = new SmsClient(UserName, Password);
+            SmsVitriniClient client = new SmsVitriniClient(UserName, Password);
             ServiceResult<MessageResponse> result = client.Send("MODAGRAMIT", new List<Message>()
             {
                 new Message() { Numbers = new List<string>() {"5542346742"}, Text = "Sample string 1."}
@@ -37,7 +37,7 @@ namespace Stark.Integration.SmsVitrini.IntegrationTests
         [TestMethod]
         public void GetCustomerDetailsTest()
         {
-            SmsClient client = new SmsClient(UserName, Password);
+            SmsVitriniClient client = new SmsVitriniClient(UserName, Password);
             ServiceResult<CustomerDetail> result = client.GetCustomerDetails();
             Assert.IsNotNull(result);
             Assert.IsTrue(result.Success);
@@ -47,7 +47,7 @@ namespace Stark.Integration.SmsVitrini.IntegrationTests
         [TestMethod]
         public void GetReportsTest()
         {
-            SmsClient client = new SmsClient(UserName, Password);
+            SmsVitriniClient client = new SmsVitriniClient(UserName, Password);
             ServiceResult<List<ReportItem>> result = client.GetReports("28218827");
             Assert.IsNotNull(result);
             Assert.IsTrue(result.Success);
