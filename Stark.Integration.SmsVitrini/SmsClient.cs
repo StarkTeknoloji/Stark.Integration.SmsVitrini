@@ -329,8 +329,42 @@ namespace Stark.Integration.SmsVitrini
 
         private FailReasonEnum? GetFailReasonFromReportDetailItem(ReportDetailItem reportDetailItem)
         {
-            // TODO: We don't know result codes yet.
-            return null;
+            if (reportDetailItem == null)
+            {
+                return null;
+            }
+
+            FailReasonEnum result;
+
+            switch (reportDetailItem.FailReason)
+            {
+                case "cannot_deliver":
+                    result = FailReasonEnum.Unknown;
+                    break;
+                case "memory_capacity_exceeded":
+                    result = FailReasonEnum.MemoryCapacityExceeded;
+                    break;
+                case "foreign_operator":
+                    result = FailReasonEnum.UnsupportedOperator;
+                    break;
+                case "foreign_country":
+                    result = FailReasonEnum.UnsupportedCountry;
+                    break;
+                case "number_not_used":
+                    result = FailReasonEnum.NumberNotInUse;
+                    break;
+                case "server_error":
+                    result = FailReasonEnum.InternalServerError;
+                    break;
+                case "phone_closed":
+                    result = FailReasonEnum.CellPhoneOutOfGrid;
+                    break;
+                default:
+                    result = FailReasonEnum.Unknown;
+                    break;
+            }
+
+            return result;
         }
 
         private OperatorEnum GetOperatorFromReportDetailItem(ReportDetailItem reportDetailItem)
@@ -367,8 +401,8 @@ namespace Stark.Integration.SmsVitrini
 
             DateTime result;
 
-            // TODO: We don't know timezone of this field yet. So this implementation needs further development.
-            if (DateTime.TryParseExact(reportDetailItem.CompletedOn, "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out result))
+            // UTC +2
+            if (DateTime.TryParseExact(reportDetailItem.CompletedOn, "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out result))
             {
                 return result;
             }
