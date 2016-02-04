@@ -125,6 +125,7 @@ namespace Stark.Integration.SmsVitrini
             {
                 result.Success = false;
                 result.Message = smsResponse.ErrorMessage;
+                result.ErrorCode = GetErrorCode(smsResponse);
             }
 
             return result;
@@ -408,6 +409,17 @@ namespace Stark.Integration.SmsVitrini
             }
 
             return null;
+        }
+
+        private ErrorCodeEnum GetErrorCode(SmsResponse smsResponse)
+        {
+            // TODO. We don't know error codes yet.
+            if (smsResponse.ErrorMessage == "")
+            {
+                return ErrorCodeEnum.InsufficientCredits;
+            }
+
+            return ErrorCodeEnum.None;
         }
 
         #endregion
