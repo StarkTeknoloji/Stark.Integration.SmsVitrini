@@ -19,5 +19,8 @@ namespace Stark.Integration.SmsVitrini.Responses
 
         [DataMember(Name = "numaralar")]
         public ReportDetailItemContainer ReportDetailItemContainer { get; set; }
+
+        [DataMember(Name = "hata")]
+        public string ErrorMessage { get; set; }
     }
 }

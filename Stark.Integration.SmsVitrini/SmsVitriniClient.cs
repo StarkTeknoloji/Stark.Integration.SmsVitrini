@@ -173,6 +173,11 @@ namespace Stark.Integration.SmsVitrini
                 result.Success = false;
                 result.Message = String.Format("There is a problem with the service response. Check the response string for more information: {0}", reportResponse.ResponseString);
             }
+            else if (!String.IsNullOrEmpty(reportResponse.Data.ErrorMessage))
+            {
+                result.Success = false;
+                result.Message = reportResponse.Data.ErrorMessage;
+            }
             else
             {
                 result.Success = true;
