@@ -183,7 +183,7 @@ namespace Stark.Integration.SmsVitrini
                 result.Success = true;
                 result.Data = new List<ReportItem>();
 
-                List<ReportItem> waitingRequests = GetReportItemsFromReportDetailItems(reportResponse.Data.ReportDetailItemContainer.WaitingNumberReportDetailItems, MessageStatusEnum.WaitingOnHost);
+                List<ReportItem> waitingRequests = GetWaitingReportItemsFromNumbers(reportResponse.Data.ReportDetailItemContainer.WaitingNumberReportDetailItems);
                 List<ReportItem> successfulRequests = GetReportItemsFromReportDetailItems(reportResponse.Data.ReportDetailItemContainer.SentNumberReportDetailItems, MessageStatusEnum.Success);
                 List<ReportItem> failedRequests = GetReportItemsFromReportDetailItems(reportResponse.Data.ReportDetailItemContainer.FailedNumberReportDetailItems, MessageStatusEnum.Failed);
 
@@ -326,6 +326,30 @@ namespace Stark.Integration.SmsVitrini
                 {
                     item.FailReason = GetFailReasonFromReportDetailItem(reportDetailItem);
                 }
+
+                results.Add(item);
+            }
+
+            return results;
+        }
+
+        private List<ReportItem> GetWaitingReportItemsFromNumbers(List<string> waitingNumberReportDetailItems)
+        {
+            if (waitingNumberReportDetailItems == null || !waitingNumberReportDetailItems.Any())
+            {
+                return null;
+            }
+
+            List<ReportItem> results = new List<ReportItem>();
+
+            foreach (string number in waitingNumberReportDetailItems)
+            {
+                ReportItem item = new ReportItem();
+
+                item.DeliveredOn = null;
+                item.PhoneNumber = number;
+                item.Status = MessageStatusEnum.WaitingOnHost;
+                item.Operator = OperatorEnum.Unknown;
 
                 results.Add(item);
             }

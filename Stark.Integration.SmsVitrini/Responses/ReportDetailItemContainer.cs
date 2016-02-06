@@ -7,7 +7,7 @@ namespace Stark.Integration.SmsVitrini.Responses
     public class ReportDetailItemContainer
     {
         [DataMember(Name = "bekleyen")]
-        public List<ReportDetailItem> WaitingNumberReportDetailItems { get; set; }
+        public List<string> WaitingNumberReportDetailItems { get; set; }
 
         [DataMember(Name = "gonderilmis")]
         public List<ReportDetailItem> SentNumberReportDetailItems { get; set; }
