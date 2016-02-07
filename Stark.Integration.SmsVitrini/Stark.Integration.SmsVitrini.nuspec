@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>$author$</authors>
+    <owners>$author$</owners>
+    <projectUrl>https://github.com/StarkTeknoloji/Stark.Integration.SmsVitrini</projectUrl>
+    <iconUrl>https://avatars2.githubusercontent.com/u/13877109?v=3&s=200</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>$description$</description>
+    <copyright>Copyright 2016</copyright>
+    <tags>sms vitrini smsvitrini starkteknoloji</tags>
+  </metadata>
+</package>
